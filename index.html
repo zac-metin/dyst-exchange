@@ -660,7 +660,6 @@
           type: "function",
         },
       ];
-
       async function handleSwap() {
         const amount = document.getElementById("amountInput").value;
         console.log("Button clicked! Amount entered:", amount); // Debug log for the amount
@@ -675,7 +674,7 @@
 
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
-          const DTFU_PRICE = 2.0;
+
           const contract = new ethers.Contract(
             DTFU_CONTRACT_ADDRESS,
             DTFU_ABI,
@@ -686,15 +685,19 @@
           console.log(`Total cost to send: ${totalCost.toString()}`);
 
           // Send transaction to swap POL for DTFU
+          console.log("Sending transaction to contract...");
           const tx = await signer.sendTransaction({
             to: DTFU_CONTRACT_ADDRESS,
             value: totalCost,
           });
 
+          console.log(`Transaction hash: ${tx.hash}`);
+
           // Wait for the transaction to be mined
           await tx.wait();
 
           // Transfer DTFU to the user
+          console.log("Transfering DTFU...");
           const transferTx = await contract.transfer(
             await signer.getAddress(),
             ethers.utils.parseEther(amount)
@@ -719,14 +722,6 @@
           console.error("Error in swap: ", error);
         }
       }
-
-      // Add event listener to the button
-      document
-        .getElementById("swapButton")
-        .addEventListener("click", function () {
-          console.log("Swap button clicked!"); // Debugging the button click event
-          handleSwap();
-        });
     </script>
   </body>
 </html>
