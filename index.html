@@ -17,7 +17,13 @@
     <!-- Custom script -->
     <script>
       console.log("Script is running!");
-      console.log(typeof ethers); // Check if ethers.js is loaded
+
+      // Check if ethers.js is loaded
+      if (typeof ethers !== "undefined") {
+        console.log("Ethers.js loaded successfully!");
+      } else {
+        console.error("Failed to load ethers.js");
+      }
 
       const DTFU_CONTRACT_ADDRESS =
         "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2";
