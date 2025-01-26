@@ -660,9 +660,15 @@
           type: "function",
         },
       ];
+
+      // Button event handler
+      document
+        .getElementById("swapButton")
+        .addEventListener("click", handleSwap);
+
       async function handleSwap() {
         const amount = document.getElementById("amountInput").value;
-        console.log("Button clicked! Amount entered:", amount); // Debug log for the amount
+        console.log("Button clicked! Amount entered:", amount); // Log the entered amount
 
         if (!amount) {
           alert("Please enter a valid amount.");
@@ -674,7 +680,6 @@
 
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
-
           const contract = new ethers.Contract(
             DTFU_CONTRACT_ADDRESS,
             DTFU_ABI,
@@ -684,7 +689,7 @@
           const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
           console.log(`Total cost to send: ${totalCost.toString()}`);
 
-          // Send transaction to swap POL for DTFU
+          // Send MATIC to contract
           console.log("Sending transaction to contract...");
           const tx = await signer.sendTransaction({
             to: DTFU_CONTRACT_ADDRESS,
