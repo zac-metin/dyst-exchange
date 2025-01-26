@@ -661,16 +661,14 @@
         },
       ];
 
-      // Set up the swap function
       async function handleSwap() {
         const amount = document.getElementById("amountInput").value;
+        console.log("Button clicked! Amount entered:", amount); // Debug log for the amount
+
         if (!amount) {
           alert("Please enter a valid amount.");
           return;
         }
-
-        console.log("Swap button clicked!");
-        console.log(`Amount entered: ${amount}`);
 
         try {
           if (!window.ethereum) throw new Error("Please install MetaMask!");
@@ -725,7 +723,10 @@
       // Add event listener to the button
       document
         .getElementById("swapButton")
-        .addEventListener("click", handleSwap);
+        .addEventListener("click", function () {
+          console.log("Swap button clicked!"); // Debugging the button click event
+          handleSwap();
+        });
     </script>
   </body>
 </html>
