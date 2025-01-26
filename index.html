@@ -655,45 +655,71 @@
         },
       ];
 
+      // Set up the swap function
+      async function handleSwap() {
+        const amount = document.getElementById("amountInput").value;
+        if (!amount) {
+          alert("Please enter a valid amount.");
+          return;
+        }
+
+        console.log("Swap button clicked!");
+        console.log(`Amount entered: ${amount}`);
+
+        try {
+          if (!window.ethereum) throw new Error("Please install MetaMask!");
+
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+
+          const contract = new ethers.Contract(
+            DTFU_CONTRACT_ADDRESS,
+            DTFU_ABI,
+            signer
+          );
+
+          const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
+          console.log(`Total cost to send: ${totalCost.toString()}`);
+
+          // Send transaction to swap POL for DTFU
+          const tx = await signer.sendTransaction({
+            to: DTFU_CONTRACT_ADDRESS,
+            value: totalCost,
+          });
+
+          // Wait for the transaction to be mined
+          await tx.wait();
+
+          // Transfer DTFU to the user
+          const transferTx = await contract.transfer(
+            await signer.getAddress(),
+            ethers.utils.parseEther(amount)
+          );
+          await transferTx.wait();
+
+          // Update status
+          document.getElementById(
+            "status"
+          ).innerText = `Successfully swapped ${amount} DTFU for ${ethers.utils.formatEther(
+            totalCost
+          )} POL`;
+          console.log(
+            `Swap successful: ${amount} DTFU for ${ethers.utils.formatEther(
+              totalCost
+            )} POL`
+          );
+        } catch (error) {
+          document.getElementById(
+            "status"
+          ).innerText = `Error: ${error.message}`;
+          console.error("Error in swap: ", error);
+        }
+      }
+
+      // Add event listener to the button
       document
         .getElementById("swapButton")
-        .addEventListener("click", async () => {
-          const amount = document.getElementById("amountInput").value;
-          const statusElement = document.getElementById("status");
-
-          try {
-            if (!window.ethereum) throw new Error("Please install MetaMask!");
-
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-
-            const contract = new ethers.Contract(
-              DTFU_CONTRACT_ADDRESS,
-              DTFU_ABI,
-              signer
-            );
-
-            const DTFU_PRICE = ethers.utils.parseEther("2.00");
-            const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
-
-            await signer.sendTransaction({
-              to: DTFU_CONTRACT_ADDRESS,
-              value: totalCost,
-            });
-
-            const tx = await contract.transfer(
-              await signer.getAddress(),
-              ethers.utils.parseEther(amount)
-            );
-            await tx.wait();
-
-            statusElement.textContent = `Successfully swapped ${amount} DTFU for ${ethers.utils.formatEther(
-              totalCost
-            )} POL`;
-          } catch (error) {
-            statusElement.textContent = `Error: ${error.message}`;
-          }
-        });
+        .addEventListener("click", handleSwap);
     </script>
   </body>
 </html>
