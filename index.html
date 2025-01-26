@@ -4,34 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dystopian Future Token Exchange</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 20px;
-      }
-      input,
-      button {
-        margin: 10px;
-        padding: 10px;
-        font-size: 16px;
-      }
-      button {
-        cursor: pointer;
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-      }
-      button:hover {
-        background-color: #45a049;
-      }
-      p {
-        margin-top: 20px;
-        font-size: 18px;
-        color: #333;
-      }
-    </style>
   </head>
   <body>
     <h1>Dystopian Future Token Exchange</h1>
@@ -39,8 +11,13 @@
     <button id="swapButton">Swap POL for DTFU</button>
     <p id="status"></p>
 
+    <!-- Include ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.2/dist/ethers.umd.min.js"></script>
+
+    <!-- Custom script -->
     <script>
+      console.log(typeof ethers); // Check if ethers.js is loaded
+
       const DTFU_CONTRACT_ADDRESS =
         "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2";
       const DTFU_ABI = [
@@ -695,10 +672,9 @@
               signer
             );
 
-            // Define the swap price: 1 DTFU = 2 POL
             const DTFU_PRICE = ethers.utils.parseEther("2.00");
-
             const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
+
             await signer.sendTransaction({
               to: DTFU_CONTRACT_ADDRESS,
               value: totalCost,
