@@ -663,75 +663,56 @@
       const DTFU_PRICE = 2.0;
       // Button event handler
 
-      const handleSwap = async () => {
-        console.log("Swap button clicked!");
+      const swapButton = document.getElementById("swapButton");
+      const statusText = document.getElementById("status");
 
+      swapButton.addEventListener("click", async () => {
         try {
-          if (!window.ethereum) {
-            console.error("MetaMask is not installed!");
-            throw new Error("Please install MetaMask!");
+          // Get the entered amount
+          const amount = document.getElementById("amount").value;
+          if (!amount || amount <= 0) {
+            throw new Error("Enter a valid amount to swap.");
           }
-          console.log("MetaMask detected.");
+          console.log("Button clicked! Amount entered:", amount);
 
-          // Request account access
-          console.log("Requesting MetaMask access...");
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-          console.log("MetaMask access granted.");
+          if (!window.ethereum) {
+            throw new Error("MetaMask is not installed!");
+          }
 
+          // Connect to MetaMask and provider
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
 
-          // Log connected account
-          const address = await signer.getAddress();
-          console.log("Connected account:", address);
-
+          // Connect to the contract
           const contract = new ethers.Contract(
-            DTFU_CONTRACT_ADDRESS,
-            DTFU_ABI,
+            contractAddress,
+            contractABI,
             signer
           );
-          console.log("Contract instance created.");
 
           // Define the swap price: 1 DTFU = 2 MATIC
-          const DTFU_PRICE = ethers.utils.parseEther("2.00");
+          const DTFU_PRICE = ethers.utils.parseEther("2.0");
           const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
-          console.log("Total cost calculated:", totalCost.toString());
 
-          // Send MATIC to the contract
-          console.log("Sending transaction...");
-          const tx = await signer.sendTransaction({
-            to: DTFU_CONTRACT_ADDRESS,
+          console.log("Total cost to send:", totalCost.toString());
+
+          // Send the transaction
+          const txResponse = await signer.sendTransaction({
+            to: contractAddress,
             value: totalCost,
           });
+          console.log("Transaction sent:", txResponse);
 
-          console.log(`Transaction sent. Hash: ${tx.hash}`);
-          const receipt = await tx.wait();
+          // Wait for the transaction to complete
+          const receipt = await txResponse.wait();
           console.log("Transaction mined:", receipt);
 
-          if (receipt.status === 1) {
-            console.log("Transaction successful!");
-            document.getElementById(
-              "status"
-            ).innerText = `Successfully swapped ${amount} DTFU for ${ethers.utils.formatEther(
-              totalCost
-            )} POL`;
-          } else {
-            console.error("Transaction failed!");
-            document.getElementById(
-              "status"
-            ).innerText = `Transaction failed. Please try again.`;
-          }
+          statusText.textContent = `Successfully swapped ${amount} DTFU tokens!`;
         } catch (error) {
-          console.error("Error encountered:", error.message);
-          document.getElementById(
-            "status"
-          ).innerText = `Error: ${error.message}`;
+          console.error(error.message);
+          statusText.textContent = `Error: ${error.message}`;
         }
-      };
-
-      document
-        .getElementById("swapButton")
-        .addEventListener("click", handleSwap);
+      });
     </script>
   </body>
 </html>
