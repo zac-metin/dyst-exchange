@@ -666,28 +666,34 @@
         .getElementById("swapButton")
         .addEventListener("click", handleSwap);
 
-      async function handleSwap() {
-        const amount = document.getElementById("amountInput").value;
-        console.log("Button clicked! Amount entered:", amount); // Log the entered amount
-
-        if (!amount) {
-          alert("Please enter a valid amount.");
-          return;
-        }
-
+      const handleSwap = async () => {
         try {
+          console.log("Button clicked!");
+
           if (!window.ethereum) throw new Error("Please install MetaMask!");
+
+          // Request account access
+          console.log("Requesting account access...");
+          await window.ethereum.request({ method: "eth_requestAccounts" });
 
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
+
+          // Log the current account address to verify the signer
+          const address = await signer.getAddress();
+          console.log("Connected account:", address);
+
           const contract = new ethers.Contract(
             DTFU_CONTRACT_ADDRESS,
             DTFU_ABI,
             signer
           );
 
+          // Define the swap price: 1 DTFU = 2 MATIC
+          const DTFU_PRICE = ethers.utils.parseEther("2.00");
+
           const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
-          console.log(`Total cost to send: ${totalCost.toString()}`);
+          console.log("Total cost to send:", totalCost.toString());
 
           // Send MATIC to contract
           console.log("Sending transaction to contract...");
@@ -697,36 +703,29 @@
           });
 
           console.log(`Transaction hash: ${tx.hash}`);
+          const receipt = await tx.wait();
+          console.log("Transaction mined! Receipt:", receipt);
 
-          // Wait for the transaction to be mined
-          await tx.wait();
-
-          // Transfer DTFU to the user
-          console.log("Transfering DTFU...");
-          const transferTx = await contract.transfer(
-            await signer.getAddress(),
-            ethers.utils.parseEther(amount)
-          );
-          await transferTx.wait();
-
-          // Update status
-          document.getElementById(
-            "status"
-          ).innerText = `Successfully swapped ${amount} DTFU for ${ethers.utils.formatEther(
-            totalCost
-          )} POL`;
-          console.log(
-            `Swap successful: ${amount} DTFU for ${ethers.utils.formatEther(
+          if (receipt.status === 1) {
+            console.log("Transaction successful!");
+            document.getElementById(
+              "status"
+            ).innerText = `Successfully swapped ${amount} DTFU for ${ethers.utils.formatEther(
               totalCost
-            )} POL`
-          );
+            )} POL`;
+          } else {
+            console.error("Transaction failed!");
+            document.getElementById(
+              "status"
+            ).innerText = `Transaction failed. Please try again.`;
+          }
         } catch (error) {
+          console.error("Error:", error.message);
           document.getElementById(
             "status"
           ).innerText = `Error: ${error.message}`;
-          console.error("Error in swap: ", error);
         }
-      }
+      };
     </script>
   </body>
 </html>
