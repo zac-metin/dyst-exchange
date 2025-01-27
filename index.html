@@ -660,7 +660,6 @@
           type: "function",
         },
       ];
-      const DTFU_PRICE = 2.0;
       // Button event handler
 
       const swapButton = document.getElementById("swapButton");
@@ -692,8 +691,10 @@
           );
 
           // Define DTFU price
-          const DTFU_PRICE = ethers.utils.parseEther("2.0"); // 1 DTFU = 2 MATIC
-          const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
+          const DTFU_PRICE = ethers.utils.parseEther("2.00"); // 2 MATIC per token
+          const totalCost = ethers.utils
+            .parseEther(amount.toString())
+            .mul(DTFU_PRICE); // Amount entered
           console.log("Total cost to send:", totalCost.toString());
 
           // Estimate the gas for the transaction
