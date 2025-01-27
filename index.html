@@ -691,11 +691,11 @@
             signer
           );
 
-          const gasEstimated = await contract.estimateGas.transfer(
-            toAddress,
-            amountInWei
-          );
-          console.log("Gas estimate:", gasEstimated.toString());
+          // const gasEstimated = await contract.estimateGas.transfer(
+          //   toAddress,
+          //   amountInWei
+          // );
+          // console.log("Gas estimate:", gasEstimated.toString());
 
           // Define DTFU price
           const totalCost = ethers.utils.parseEther(amount.toString()).mul(2);
