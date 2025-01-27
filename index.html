@@ -691,10 +691,10 @@
           );
 
           // Define DTFU price
-          const DTFU_PRICE = ethers.utils.parseUnits("2.00", "ether"); // 2 MATIC per token (equivalent to 2 * 10^18 wei)
-          const totalCost = ethers.utils
-            .parseUnits(amount.toString(), "ether")
-            .mul(DTFU_PRICE); // Amount entered
+          const DTFU_PRICE = ethers.utils.parseEther("2.00"); // 2 MATIC per token
+          const totalCost = DTFU_PRICE.mul(
+            ethers.utils.parseEther(amount.toString())
+          );
           console.log("Total cost to send:", totalCost.toString());
 
           // Estimate the gas for the transaction
