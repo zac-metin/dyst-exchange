@@ -685,8 +685,8 @@
 
           // Connect to the contract
           const contract = new ethers.Contract(
-            contractAddress,
-            contractABI,
+            DTFU_CONTRACT_ADDRESS,
+            DTFU_ABI,
             signer
           );
 
@@ -698,7 +698,7 @@
 
           // Send the transaction
           const txResponse = await signer.sendTransaction({
-            to: contractAddress,
+            to: DTFU_CONTRACT_ADDRESS,
             value: totalCost,
           });
           console.log("Transaction sent:", txResponse);
