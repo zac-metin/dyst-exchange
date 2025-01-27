@@ -662,9 +662,6 @@
       ];
       const DTFU_PRICE = 2.0;
       // Button event handler
-      document
-        .getElementById("swapButton")
-        .addEventListener("click", handleSwap);
 
       const handleSwap = async () => {
         console.log("Swap button clicked!");
@@ -731,6 +728,10 @@
           ).innerText = `Error: ${error.message}`;
         }
       };
+
+      document
+        .getElementById("swapButton")
+        .addEventListener("click", handleSwap);
     </script>
   </body>
 </html>
