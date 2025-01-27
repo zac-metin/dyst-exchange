@@ -667,19 +667,24 @@
         .addEventListener("click", handleSwap);
 
       const handleSwap = async () => {
-        try {
-          console.log("Button clicked!");
+        console.log("Swap button clicked!");
 
-          if (!window.ethereum) throw new Error("Please install MetaMask!");
+        try {
+          if (!window.ethereum) {
+            console.error("MetaMask is not installed!");
+            throw new Error("Please install MetaMask!");
+          }
+          console.log("MetaMask detected.");
 
           // Request account access
-          console.log("Requesting account access...");
+          console.log("Requesting MetaMask access...");
           await window.ethereum.request({ method: "eth_requestAccounts" });
+          console.log("MetaMask access granted.");
 
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
 
-          // Log the current account address to verify the signer
+          // Log connected account
           const address = await signer.getAddress();
           console.log("Connected account:", address);
 
@@ -688,23 +693,23 @@
             DTFU_ABI,
             signer
           );
+          console.log("Contract instance created.");
 
           // Define the swap price: 1 DTFU = 2 MATIC
           const DTFU_PRICE = ethers.utils.parseEther("2.00");
-
           const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
-          console.log("Total cost to send:", totalCost.toString());
+          console.log("Total cost calculated:", totalCost.toString());
 
-          // Send MATIC to contract
-          console.log("Sending transaction to contract...");
+          // Send MATIC to the contract
+          console.log("Sending transaction...");
           const tx = await signer.sendTransaction({
             to: DTFU_CONTRACT_ADDRESS,
             value: totalCost,
           });
 
-          console.log(`Transaction hash: ${tx.hash}`);
+          console.log(`Transaction sent. Hash: ${tx.hash}`);
           const receipt = await tx.wait();
-          console.log("Transaction mined! Receipt:", receipt);
+          console.log("Transaction mined:", receipt);
 
           if (receipt.status === 1) {
             console.log("Transaction successful!");
@@ -720,7 +725,7 @@
             ).innerText = `Transaction failed. Please try again.`;
           }
         } catch (error) {
-          console.error("Error:", error.message);
+          console.error("Error encountered:", error.message);
           document.getElementById(
             "status"
           ).innerText = `Error: ${error.message}`;
