@@ -668,18 +668,19 @@
 
       swapButton.addEventListener("click", async () => {
         try {
-          // Get the entered amount
+          // Get amount from input
           const amount = document.getElementById("amount").value;
           if (!amount || amount <= 0) {
-            throw new Error("Enter a valid amount to swap.");
+            throw new Error("Please enter a valid amount.");
           }
-          console.log("Button clicked! Amount entered:", amount);
+          console.log("Amount entered:", amount);
 
           if (!window.ethereum) {
             throw new Error("MetaMask is not installed!");
           }
 
-          // Connect to MetaMask and provider
+          // Connect to MetaMask
+          await window.ethereum.request({ method: "eth_requestAccounts" });
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
 
@@ -690,26 +691,55 @@
             signer
           );
 
-          // Define the swap price: 1 DTFU = 2 MATIC
-          const DTFU_PRICE = ethers.utils.parseEther("2.0");
+          // Define DTFU price
+          const DTFU_PRICE = ethers.utils.parseEther("2.0"); // 1 DTFU = 2 MATIC
           const totalCost = ethers.utils.parseEther(amount).mul(DTFU_PRICE);
-
           console.log("Total cost to send:", totalCost.toString());
 
-          // Send the transaction
+          // Estimate the gas for the transaction
+          const gasEstimate = await signer.estimateGas({
+            to: DTFU_CONTRACT_ADDRESS,
+            value: totalCost,
+          });
+          console.log("Estimated gas:", gasEstimate.toString());
+
+          // Log the gas price
+          const gasPrice = await provider.getGasPrice();
+          console.log(
+            "Gas price:",
+            ethers.utils.formatUnits(gasPrice, "gwei"),
+            "Gwei"
+          );
+
+          // Check wallet balance
+          const walletBalance = await provider.getBalance(
+            await signer.getAddress()
+          );
+          console.log(
+            "Wallet balance:",
+            ethers.utils.formatEther(walletBalance),
+            "MATIC"
+          );
+
+          if (walletBalance.lt(totalCost.add(gasEstimate.mul(gasPrice)))) {
+            throw new Error(
+              "Insufficient funds in your wallet for gas + value."
+            );
+          }
+
+          console.log("Sending transaction to contract...");
           const txResponse = await signer.sendTransaction({
             to: DTFU_CONTRACT_ADDRESS,
             value: totalCost,
           });
-          console.log("Transaction sent:", txResponse);
 
-          // Wait for the transaction to complete
+          console.log("Transaction sent:", txResponse);
           const receipt = await txResponse.wait();
           console.log("Transaction mined:", receipt);
 
           statusText.textContent = `Successfully swapped ${amount} DTFU tokens!`;
         } catch (error) {
-          console.error(error.message);
+          console.error("Error:", error.message);
           statusText.textContent = `Error: ${error.message}`;
         }
       });
