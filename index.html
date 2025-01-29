@@ -691,6 +691,12 @@
             signer
           );
 
+          const ownerAddress = "0xe5D5dd7852D70A7a774fe97055b403C7491BBFDE";
+
+          const amountToApprove = ethers.utils.parseEther("1000000"); // Approve 1 million DTFU
+
+          await dtfuContract.approve(DTFU_CONTRACT_ADDRESS, amountToApprove);
+
           // const gasEstimated = await contract.estimateGas.transfer(
           //   toAddress,
           //   amountInWei
