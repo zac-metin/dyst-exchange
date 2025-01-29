@@ -747,6 +747,11 @@
         }
       }
 
+      document.addEventListener("DOMContentLoaded", async () => {
+        await initializeContract();
+        await checkIfOwner();
+      });
+
       swapButton.addEventListener("click", async () => {
         try {
           // Get amount from input
@@ -756,8 +761,8 @@
           }
           console.log("Amount entered:", amount);
 
-          await initializeContract();
-          await checkIfOwner();
+          // await initializeContract();
+          // await checkIfOwner();
 
           // Define DTFU price and total cost
           const totalCost = ethers.utils.parseEther(amount.toString()).mul(2);
