@@ -748,6 +748,7 @@
       }
 
       document.addEventListener("DOMContentLoaded", async () => {
+        console.log("DOM content loaded");
         await initializeContract();
         await checkIfOwner();
       });
