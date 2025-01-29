@@ -699,6 +699,7 @@
       }
 
       async function checkIfOwner() {
+        console.log("Calling Owner Check");
         const account = await signer.getAddress();
         if (account.toLowerCase() === ownerAddress.toLowerCase()) {
           console.log("Owner account detected. Showing owner-specific UI.");
