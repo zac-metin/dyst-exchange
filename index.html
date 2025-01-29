@@ -10,6 +10,19 @@
     <input id="amount" type="number" placeholder="Amount of DTFU" />
     <button id="swapButton">Swap POL for DTFU</button>
     <p id="status"></p>
+    <h2>Owner Functions</h2>
+    <!-- Hidden UI elements for the owner account -->
+    <div id="ownerUI" style="display: none">
+      <button id="withdrawButton">Withdraw POL</button>
+      <div>
+        <input
+          type="text"
+          id="dtfuAmount"
+          placeholder="Amount to transfer DTFU"
+        />
+        <button id="transferDTFUButton">Transfer DTFU to contract</button>
+      </div>
+    </div>
 
     <!-- Include ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -24,7 +37,7 @@
       } else {
         console.error("Failed to load ethers.js");
       }
-
+      const ownerAddress = "0xe5D5dd7852D70A7a774fe97055b403C7491BBFDE";
       const DTFU_CONTRACT_ADDRESS =
         "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2";
       const DTFU_ABI = [
@@ -665,39 +678,83 @@
       const swapButton = document.getElementById("swapButton");
       const statusText = document.getElementById("status");
 
+      const withdrawButton = document.getElementById("withdrawButton");
+      const transferDTFUButton = document.getElementById("transferDTFUButton");
+      const dtfuAmountInput = document.getElementById("dtfuAmount");
+
+      let provider, signer, contract;
+
+      async function initializeContract() {
+        if (!window.ethereum) {
+          throw new Error("MetaMask is not installed!");
+        }
+
+        // Connect to MetaMask
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+
+        // Connect to the contract
+        contract = new ethers.Contract(DTFU_CONTRACT_ADDRESS, DTFU_ABI, signer);
+      }
+
+      async function checkIfOwner() {
+        const account = await signer.getAddress();
+        if (account.toLowerCase() === ownerAddress.toLowerCase()) {
+          document.getElementById("ownerUI").style.display = "block"; // Show owner-specific UI
+        }
+      }
+
+      async function withdrawPOL() {
+        try {
+          // Call the withdraw function from the contract
+          const tx = await contract.withdraw();
+          console.log("Withdrawal transaction sent:", tx);
+          await tx.wait(); // Wait for transaction to be mined
+          console.log("POL withdrawn successfully!");
+          statusText.textContent = "POL withdrawn successfully!";
+        } catch (error) {
+          console.error("Error withdrawing POL:", error);
+          statusText.textContent = `Error: ${error.message}`;
+        }
+      }
+
+      async function transferDTFUToContract() {
+        try {
+          const amount = parseFloat(dtfuAmountInput.value);
+          if (!amount || amount <= 0) {
+            throw new Error("Please enter a valid DTFU amount.");
+          }
+
+          const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
+          const tx = await contract.transferFrom(
+            ownerAddress,
+            DTFU_CONTRACT_ADDRESS,
+            amountInWei
+          ); // Make sure the contract has an approval for this action
+          console.log("DTFU transfer transaction sent:", tx);
+          await tx.wait(); // Wait for transaction to be mined
+          console.log("DTFU transferred to contract successfully!");
+          statusText.textContent = `${amount} DTFU transferred to contract successfully!`;
+        } catch (error) {
+          console.error("Error transferring DTFU to contract:", error);
+          statusText.textContent = `Error: ${error.message}`;
+        }
+      }
+
       swapButton.addEventListener("click", async () => {
         try {
           // Get amount from input
-
           const amount = document.getElementById("amount").value;
           if (!amount || amount <= 0) {
             throw new Error("Please enter a valid amount.");
           }
           console.log("Amount entered:", amount);
 
-          if (!window.ethereum) {
-            throw new Error("MetaMask is not installed!");
-          }
+          await initializeContract();
+          await checkIfOwner();
 
-          // Connect to MetaMask
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          const signer = provider.getSigner();
-
-          // Connect to the contract
-          const contract = new ethers.Contract(
-            DTFU_CONTRACT_ADDRESS,
-            DTFU_ABI,
-            signer
-          );
-
-          // const gasEstimated = await contract.estimateGas.transfer(
-          //   toAddress,
-          //   amountInWei
-          // );
-          // console.log("Gas estimate:", gasEstimated.toString());
-
-          // Define DTFU price
+          // Define DTFU price and total cost
           const totalCost = ethers.utils.parseEther(amount.toString()).mul(2);
           console.log("Total cost to send:", totalCost.toString());
 
@@ -748,6 +805,10 @@
           statusText.textContent = `Error: ${error.message}`;
         }
       });
+
+      // Attach event listeners for owner-specific actions
+      withdrawButton.addEventListener("click", withdrawPOL);
+      transferDTFUButton.addEventListener("click", transferDTFUToContract);
     </script>
   </body>
 </html>
