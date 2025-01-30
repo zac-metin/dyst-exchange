@@ -732,11 +732,18 @@
           }
 
           const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
+
+          // Set fixed gas price (in gwei) and gas limit
+          const gasPrice = ethers.utils.parseUnits("50", "gwei"); // Adjust based on network congestion
+          const gasLimit = 500000; // Adjust based on contract execution needs
+
           const tx = await contract.transferFrom(
             ownerAddress,
             DTFU_CONTRACT_ADDRESS,
-            amountInWei
-          ); // Make sure the contract has an approval for this action
+            amountInWei,
+            { gasPrice, gasLimit } // Set gas price and limit
+          );
+
           console.log("DTFU transfer transaction sent:", tx);
           await tx.wait(); // Wait for transaction to be mined
           console.log("DTFU transferred to contract successfully!");
