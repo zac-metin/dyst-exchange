@@ -726,6 +726,12 @@
 
       async function transferDTFUToContract() {
         try {
+          const amount = parseFloat(dtfuAmountInput.value);
+          if (!amount || amount <= 0) {
+            throw new Error("Please enter a valid DTFU amount.");
+          }
+
+          const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
           const allowance = await contract.allowance(
             ownerAddress,
             DTFU_CONTRACT_ADDRESS
@@ -738,13 +744,6 @@
             await approveTx.wait();
             console.log("Approval successful!");
           }
-          const amount = parseFloat(dtfuAmountInput.value);
-          if (!amount || amount <= 0) {
-            throw new Error("Please enter a valid DTFU amount.");
-          }
-
-          const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
-
           // Set fixed gas price (in gwei) and gas limit
           const gasPrice = ethers.utils.parseUnits("50", "gwei"); // Adjust based on network congestion
           const gasLimit = 500000; // Adjust based on contract execution needs
