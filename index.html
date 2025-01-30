@@ -8,7 +8,8 @@
   <body>
     <h1>Dystopian Future Token Exchange</h1>
     <input id="amount" type="number" placeholder="Amount of DTFU" />
-    <button id="swapButton">Swap POL for DTFU</button>
+    <!-- <button id="swapButton">Swap POL for DTFU</button> -->
+    <button onclick="swapTokens()">Swap 0.1 MATIC for Tokens</button>
     <p id="status"></p>
     <h2>Owner Functions</h2>
     <!-- Hidden UI elements for the owner account -->
@@ -724,44 +725,70 @@
         }
       }
 
-      async function transferDTFUToContract() {
+      // async function transferDTFUToContract() {
+      //   try {
+      //     const amount = parseFloat(dtfuAmountInput.value);
+      //     if (!amount || amount <= 0) {
+      //       throw new Error("Please enter a valid DTFU amount.");
+      //     }
+
+      //     const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
+      //     const allowance = await contract.allowance(
+      //       ownerAddress,
+      //       DTFU_CONTRACT_ADDRESS
+      //     );
+      //     if (allowance.lt(amountInWei)) {
+      //       const approveTx = await contract.approve(
+      //         DTFU_CONTRACT_ADDRESS,
+      //         amountInWei
+      //       );
+      //       await approveTx.wait();
+      //       console.log("Approval successful!");
+      //     }
+      //     // Set fixed gas price (in gwei) and gas limit
+      //     const gasPrice = ethers.utils.parseUnits("50", "gwei"); // Adjust based on network congestion
+      //     const gasLimit = 500000; // Adjust based on contract execution needs
+
+      //     const tx = await contract.transferFrom(
+      //       ownerAddress,
+      //       DTFU_CONTRACT_ADDRESS,
+      //       amountInWei,
+      //       { gasPrice, gasLimit } // Set gas price and limit
+      //     );
+
+      //     console.log("DTFU transfer transaction sent:", tx);
+      //     await tx.wait(); // Wait for transaction to be mined
+      //     console.log("DTFU transferred to contract successfully!");
+      //     statusText.textContent = `${amount} DTFU transferred to contract successfully!`;
+      //   } catch (error) {
+      //     console.error("Error transferring DTFU to contract:", error);
+      //     statusText.textContent = `Error: ${error.message}`;
+      //   }
+      // }
+
+      async function swapTokens() {
+        if (!window.ethereum) {
+          alert("MetaMask is required");
+          return;
+        }
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
+        const abi = ["function swap() external payable"];
+
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+
+        const amountInMatic = "0.1"; // Example amount in MATIC
+        const amountInWei = ethers.utils.parseEther(amountInMatic);
+
         try {
-          const amount = parseFloat(dtfuAmountInput.value);
-          if (!amount || amount <= 0) {
-            throw new Error("Please enter a valid DTFU amount.");
-          }
-
-          const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
-          const allowance = await contract.allowance(
-            ownerAddress,
-            DTFU_CONTRACT_ADDRESS
-          );
-          if (allowance.lt(amountInWei)) {
-            const approveTx = await contract.approve(
-              DTFU_CONTRACT_ADDRESS,
-              amountInWei
-            );
-            await approveTx.wait();
-            console.log("Approval successful!");
-          }
-          // Set fixed gas price (in gwei) and gas limit
-          const gasPrice = ethers.utils.parseUnits("50", "gwei"); // Adjust based on network congestion
-          const gasLimit = 500000; // Adjust based on contract execution needs
-
-          const tx = await contract.transferFrom(
-            ownerAddress,
-            DTFU_CONTRACT_ADDRESS,
-            amountInWei,
-            { gasPrice, gasLimit } // Set gas price and limit
-          );
-
-          console.log("DTFU transfer transaction sent:", tx);
-          await tx.wait(); // Wait for transaction to be mined
-          console.log("DTFU transferred to contract successfully!");
-          statusText.textContent = `${amount} DTFU transferred to contract successfully!`;
+          const tx = await contract.swap({ value: amountInWei });
+          console.log("Transaction sent:", tx.hash);
+          await tx.wait();
+          console.log("Swap completed!");
         } catch (error) {
-          console.error("Error transferring DTFU to contract:", error);
-          statusText.textContent = `Error: ${error.message}`;
+          console.error("Swap failed:", error);
         }
       }
 
