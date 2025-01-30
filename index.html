@@ -726,6 +726,18 @@
 
       async function transferDTFUToContract() {
         try {
+          const allowance = await contract.allowance(
+            ownerAddress,
+            DTFU_CONTRACT_ADDRESS
+          );
+          if (allowance.lt(amountInWei)) {
+            const approveTx = await contract.approve(
+              DTFU_CONTRACT_ADDRESS,
+              amountInWei
+            );
+            await approveTx.wait();
+            console.log("Approval successful!");
+          }
           const amount = parseFloat(dtfuAmountInput.value);
           if (!amount || amount <= 0) {
             throw new Error("Please enter a valid DTFU amount.");
