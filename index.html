@@ -699,6 +699,7 @@
       }
 
       async function checkIfOwner() {
+        console.log("Calling Owner Check");
         const account = await signer.getAddress();
         if (account.toLowerCase() === ownerAddress.toLowerCase()) {
           console.log("Owner account detected. Showing owner-specific UI.");
@@ -731,11 +732,29 @@
           }
 
           const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
+          const allowance = await contract.allowance(
+            ownerAddress,
+            DTFU_CONTRACT_ADDRESS
+          );
+          if (allowance.lt(amountInWei)) {
+            const approveTx = await contract.approve(
+              DTFU_CONTRACT_ADDRESS,
+              amountInWei
+            );
+            await approveTx.wait();
+            console.log("Approval successful!");
+          }
+          // Set fixed gas price (in gwei) and gas limit
+          const gasPrice = ethers.utils.parseUnits("50", "gwei"); // Adjust based on network congestion
+          const gasLimit = 500000; // Adjust based on contract execution needs
+
           const tx = await contract.transferFrom(
             ownerAddress,
             DTFU_CONTRACT_ADDRESS,
-            amountInWei
-          ); // Make sure the contract has an approval for this action
+            amountInWei,
+            { gasPrice, gasLimit } // Set gas price and limit
+          );
+
           console.log("DTFU transfer transaction sent:", tx);
           await tx.wait(); // Wait for transaction to be mined
           console.log("DTFU transferred to contract successfully!");
@@ -746,6 +765,12 @@
         }
       }
 
+      document.addEventListener("DOMContentLoaded", async () => {
+        console.log("DOM content loaded");
+        await initializeContract();
+        await checkIfOwner();
+      });
+
       swapButton.addEventListener("click", async () => {
         try {
           // Get amount from input
@@ -755,8 +780,8 @@
           }
           console.log("Amount entered:", amount);
 
-          await initializeContract();
-          await checkIfOwner();
+          // await initializeContract();
+          // await checkIfOwner();
 
           // Define DTFU price and total cost
           const totalCost = ethers.utils.parseEther(amount.toString()).mul(2);
