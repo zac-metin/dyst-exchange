@@ -694,7 +694,7 @@
 
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
-        const amountInMatic = dtfuAmount.value; // Example amount in MATIC
+        const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
         const amountInWei = ethers.utils.parseEther(amountInMatic);
 
         try {
