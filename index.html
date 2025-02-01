@@ -877,7 +877,7 @@
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
-          const abi = ["function burn(uint256 amount) external"]; // Ensure your contract has a burn function
+          const abi = DTFU_ABI; // Ensure your contract has a burn function
 
           const contract = new ethers.Contract(contractAddress, abi, signer);
 
