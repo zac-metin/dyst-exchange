@@ -6,29 +6,9 @@
     <title>Dystopian Future Token Exchange</title>
   </head>
   <body>
-    <h1>Dystopian Future Token Exchange</h1>
     <input id="amount" type="number" placeholder="Amount of DTFU" />
-    <!-- <button id="swapButton">Swap POL for DTFU</button> -->
-    <button onclick="swapTokens()">Swap 0.1 MATIC for Tokens</button>
+    <button onclick="swapTokens()">Swap POL for Tokens</button>
     <p id="status"></p>
-    <h2>Owner Functions</h2>
-    <!-- Hidden UI elements for the owner account -->
-    <div id="ownerUI" style="display: none">
-      <button id="withdrawButton">Withdraw POL</button>
-      <div>
-        <input
-          type="text"
-          id="dtfuAmount"
-          placeholder="Amount to transfer DTFU"
-        />
-        <button id="transferDTFUButton">Transfer DTFU to contract</button>
-      </div>
-      <div>
-        <input type="text" id="burnAmount" placeholder="Enter amount to burn" />
-        <button id="burnButton" onclick="burnTokens()">Burn Tokens</button>
-        <p id="burnStatus"></p>
-      </div>
-    </div>
 
     <!-- Include ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -681,16 +661,9 @@
       ];
       // Button event handler
 
-      const swapButton = document.getElementById("swapButton");
       const statusText = document.getElementById("status");
-      const burnButton = document.getElementById("burnButton");
 
-      console.log(swapButton);
-      console.log(burnButton);
-
-      const withdrawButton = document.getElementById("withdrawButton");
-      const transferDTFUButton = document.getElementById("transferDTFUButton");
-      const dtfuAmountInput = document.getElementById("dtfuAmount");
+      const dtfuAmountInput = document.getElementById("amount");
 
       let provider, signer, contract;
 
@@ -708,88 +681,20 @@
         contract = new ethers.Contract(DTFU_CONTRACT_ADDRESS, DTFU_ABI, signer);
       }
 
-      async function checkIfOwner() {
-        console.log("Calling Owner Check");
-        const account = await signer.getAddress();
-        if (account.toLowerCase() === ownerAddress.toLowerCase()) {
-          console.log("Owner account detected. Showing owner-specific UI.");
-          document.getElementById("ownerUI").style.display = "block"; // Show owner-specific UI
-        } else {
-          console.log("Non-owner account detected. Hiding owner-specific UI.");
-          document.getElementById("ownerUI").style.display = "none"; // Hide owner-specific UI
-        }
-      }
-
-      async function withdrawPOL() {
-        try {
-          // Call the withdraw function from the contract
-          const tx = await contract.withdraw();
-          console.log("Withdrawal transaction sent:", tx);
-          await tx.wait(); // Wait for transaction to be mined
-          console.log("POL withdrawn successfully!");
-          statusText.textContent = "POL withdrawn successfully!";
-        } catch (error) {
-          console.error("Error withdrawing POL:", error);
-          statusText.textContent = `Error: ${error.message}`;
-        }
-      }
-
-      // async function transferDTFUToContract() {
-      //   try {
-      //     const amount = parseFloat(dtfuAmountInput.value);
-      //     if (!amount || amount <= 0) {
-      //       throw new Error("Please enter a valid DTFU amount.");
-      //     }
-
-      //     const amountInWei = ethers.utils.parseUnits(amount.toString(), 18); // Assuming 18 decimals for DTFU
-      //     const allowance = await contract.allowance(
-      //       ownerAddress,
-      //       DTFU_CONTRACT_ADDRESS
-      //     );
-      //     if (allowance.lt(amountInWei)) {
-      //       const approveTx = await contract.approve(
-      //         DTFU_CONTRACT_ADDRESS,
-      //         amountInWei
-      //       );
-      //       await approveTx.wait();
-      //       console.log("Approval successful!");
-      //     }
-      //     // Set fixed gas price (in gwei) and gas limit
-      //     const gasPrice = ethers.utils.parseUnits("50", "gwei"); // Adjust based on network congestion
-      //     const gasLimit = 500000; // Adjust based on contract execution needs
-
-      //     const tx = await contract.transferFrom(
-      //       ownerAddress,
-      //       DTFU_CONTRACT_ADDRESS,
-      //       amountInWei,
-      //       { gasPrice, gasLimit } // Set gas price and limit
-      //     );
-
-      //     console.log("DTFU transfer transaction sent:", tx);
-      //     await tx.wait(); // Wait for transaction to be mined
-      //     console.log("DTFU transferred to contract successfully!");
-      //     statusText.textContent = `${amount} DTFU transferred to contract successfully!`;
-      //   } catch (error) {
-      //     console.error("Error transferring DTFU to contract:", error);
-      //     statusText.textContent = `Error: ${error.message}`;
-      //   }
-      // }
-
       async function swapTokens() {
         if (!window.ethereum) {
           alert("MetaMask is required");
           return;
         }
-        console.log("USING THE FUNCTION");
 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
-        const abi = ["function swap() external payable"];
+        const abi = DTFU_ABI; //["function swap() external payable"];
 
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
-        const amountInMatic = "0.1"; // Example amount in MATIC
+        const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
         const amountInWei = ethers.utils.parseEther(amountInMatic);
 
         try {
@@ -803,124 +708,8 @@
       }
 
       document.addEventListener("DOMContentLoaded", async () => {
-        console.log("DOM content loaded");
         await initializeContract();
-        await checkIfOwner();
       });
-
-      // swapButton.addEventListener("click", async () => {
-      //   try {
-      //     // Get amount from input
-      //     console.log("USING THE LISTENER");
-      //     const amount = document.getElementById("amount").value;
-      //     if (!amount || amount <= 0) {
-      //       throw new Error("Please enter a valid amount.");
-      //     }
-      //     console.log("Amount entered:", amount);
-
-      //     // await initializeContract();
-      //     // await checkIfOwner();
-
-      //     // Define DTFU price and total cost
-      //     const totalCost = ethers.utils.parseEther(amount.toString()).mul(2);
-      //     console.log("Total cost to send:", totalCost.toString());
-
-      //     // Estimate the gas for the transaction
-      //     const gasEstimate = await signer.estimateGas({
-      //       to: DTFU_CONTRACT_ADDRESS,
-      //       value: totalCost,
-      //     });
-      //     console.log("Estimated gas:", gasEstimate.toString());
-
-      //     // Log the gas price
-      //     const gasPrice = await provider.getGasPrice();
-      //     console.log(
-      //       "Gas price:",
-      //       ethers.utils.formatUnits(gasPrice, "gwei"),
-      //       "Gwei"
-      //     );
-
-      //     // Check wallet balance
-      //     const walletBalance = await provider.getBalance(
-      //       await signer.getAddress()
-      //     );
-      //     console.log(
-      //       "Wallet balance:",
-      //       ethers.utils.formatEther(walletBalance),
-      //       "MATIC"
-      //     );
-
-      //     if (walletBalance.lt(totalCost.add(gasEstimate.mul(gasPrice)))) {
-      //       throw new Error(
-      //         "Insufficient funds in your wallet for gas + value."
-      //       );
-      //     }
-
-      //     console.log("Sending transaction to contract...");
-      //     const txResponse = await signer.sendTransaction({
-      //       to: DTFU_CONTRACT_ADDRESS,
-      //       value: totalCost,
-      //     });
-
-      //     console.log("Transaction sent:", txResponse);
-      //     const receipt = await txResponse.wait();
-      //     console.log("Transaction mined:", receipt);
-
-      //     statusText.textContent = `Successfully swapped ${amount} DTFU tokens!`;
-      //   } catch (error) {
-      //     console.error("Error:", error.message);
-      //     statusText.textContent = `Error: ${error.message}`;
-      //   }
-      // });
-
-      async function burnTokens() {
-        console.log("hello");
-        try {
-          if (!window.ethereum) {
-            alert("MetaMask is required");
-            return;
-          }
-
-          console.log("Starting burn");
-
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          await provider.send("eth_requestAccounts", []);
-          const signer = provider.getSigner();
-
-          const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Your contract
-          const abi = DTFU_ABI; // Use `burn`, not `burnFrom`
-
-          const contract = new ethers.Contract(contractAddress, abi, signer);
-
-          const burnAmount = document.getElementById("burnAmount").value;
-          if (!burnAmount || isNaN(burnAmount) || burnAmount <= 0) {
-            throw new Error("Please enter a valid amount.");
-          }
-
-          const amountToBurn = ethers.utils.parseEther(burnAmount);
-
-          console.log("Burning tokens:", burnAmount);
-
-          const tx = await contract.burn(amountToBurn);
-          console.log("Transaction sent:", tx.hash);
-
-          await tx.wait();
-          console.log("Burn successful!");
-
-          document.getElementById(
-            "burnStatus"
-          ).textContent = `Successfully burned ${burnAmount} tokens!`;
-        } catch (error) {
-          console.error("Burn failed:", error);
-          document.getElementById(
-            "burnStatus"
-          ).textContent = `Error: ${error.message}`;
-        }
-      }
-
-      // Attach event listeners for owner-specific actions
-      withdrawButton.addEventListener("click", withdrawPOL);
-      //transferDTFUButton.addEventListener("click", transferDTFUToContract);
     </script>
   </body>
 </html>
