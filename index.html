@@ -22,6 +22,9 @@
           placeholder="Amount to transfer DTFU"
         />
         <button id="transferDTFUButton">Transfer DTFU to contract</button>
+        <input type="text" id="burnAmount" placeholder="Enter amount to burn" />
+        <button id="burnButton">Burn Tokens</button>
+        <p id="burnStatus"></p>
       </div>
     </div>
 
@@ -861,6 +864,49 @@
           statusText.textContent = `Error: ${error.message}`;
         }
       });
+
+      document
+        .getElementById("burnButton")
+        .addEventListener("click", async () => {
+          try {
+            if (!window.ethereum) {
+              alert("MetaMask is required");
+              return;
+            }
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contractAddress =
+              "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
+            const abi = ["function burn(uint256 amount) external"]; // Ensure your contract has a burn function
+
+            const contract = new ethers.Contract(contractAddress, abi, signer);
+
+            const burnAmount = document.getElementById("burnAmount").value;
+            if (!burnAmount || isNaN(burnAmount) || burnAmount <= 0) {
+              throw new Error("Please enter a valid amount.");
+            }
+
+            // Convert to the correct token unit (assuming 18 decimals)
+            const amountToBurn = ethers.utils.parseEther(burnAmount);
+
+            console.log("Burning tokens:", burnAmount);
+
+            const tx = await contract.burn(amountToBurn);
+            console.log("Transaction sent:", tx.hash);
+            await tx.wait();
+            console.log("Burn successful!");
+
+            document.getElementById(
+              "burnStatus"
+            ).textContent = `Successfully burned ${burnAmount} tokens!`;
+          } catch (error) {
+            console.error("Burn failed:", error.message);
+            document.getElementById(
+              "burnStatus"
+            ).textContent = `Error: ${error.message}`;
+          }
+        });
 
       // Attach event listeners for owner-specific actions
       withdrawButton.addEventListener("click", withdrawPOL);
