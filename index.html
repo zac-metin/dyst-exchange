@@ -865,19 +865,21 @@
           statusText.textContent = `Error: ${error.message}`;
         }
       });
-
       burnButton.addEventListener("click", async () => {
-        console.log("Starting burn");
         try {
           if (!window.ethereum) {
             alert("MetaMask is required");
             return;
           }
-          console.log("Strting burn");
+
+          console.log("Starting burn");
+
           const provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
           const signer = provider.getSigner();
-          const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
-          const abi = DTFU_ABI; // Ensure your contract has a burn function
+
+          const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Your contract
+          const abi = DTFU_ABI; // Use `burn`, not `burnFrom`
 
           const contract = new ethers.Contract(contractAddress, abi, signer);
 
@@ -886,13 +888,13 @@
             throw new Error("Please enter a valid amount.");
           }
 
-          // Convert to the correct token unit (assuming 18 decimals)
           const amountToBurn = ethers.utils.parseEther(burnAmount);
 
           console.log("Burning tokens:", burnAmount);
 
           const tx = await contract.burn(amountToBurn);
           console.log("Transaction sent:", tx.hash);
+
           await tx.wait();
           console.log("Burn successful!");
 
@@ -900,7 +902,7 @@
             "burnStatus"
           ).textContent = `Successfully burned ${burnAmount} tokens!`;
         } catch (error) {
-          console.error("Burn failed:", error.message);
+          console.error("Burn failed:", error);
           document.getElementById(
             "burnStatus"
           ).textContent = `Error: ${error.message}`;
