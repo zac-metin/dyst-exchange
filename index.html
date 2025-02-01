@@ -780,6 +780,7 @@
           alert("MetaMask is required");
           return;
         }
+        console.log("USING THE FUNCTION");
 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
@@ -810,6 +811,7 @@
       swapButton.addEventListener("click", async () => {
         try {
           // Get amount from input
+          console.log("USING THE LISTENER");
           const amount = document.getElementById("amount").value;
           if (!amount || amount <= 0) {
             throw new Error("Please enter a valid amount.");
