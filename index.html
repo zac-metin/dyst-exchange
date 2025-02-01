@@ -865,7 +865,9 @@
           statusText.textContent = `Error: ${error.message}`;
         }
       });
+
       burnButton.addEventListener("click", async () => {
+        console.log("hello");
         try {
           if (!window.ethereum) {
             alert("MetaMask is required");
