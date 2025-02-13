@@ -26,6 +26,9 @@
       }
 
       .exchange-rate {
+        color: #833b47;
+      }
+      .exchange-rate-value {
         color: #6d2e3a;
       }
 
@@ -56,7 +59,8 @@
   </head>
   <body>
     <div class="input-container">
-      <p id="exchange-rate">Current Exchange Rate: 2 POL = 1 DTFU</p>
+      <p id="exchange-rate">Current Exchange Rate:</p>
+      <p id="exchange-rate-value">2 POL = 1 DTFU</p>
       <input id="amount" type="number" placeholder="Amount of DTFU" />
       <button onclick="swapTokens()">Swap POL for Tokens</button>
       <p id="status"></p>
