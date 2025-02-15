@@ -63,9 +63,8 @@
       <p class="exchange-rate">Current Exchange Rate:</p>
       <p class="exchange-rate-value">2 POL = 1 DTFU</p>
       <input id="amount" type="number" placeholder="Amount of DTFU" />
-      <button id="swapButton">
-        <!-- <button id="swapButton" onclick="swapTokens()"> -->
-        Swap POL t for Tokens
+      <button id="swapButton" onclick="swapTokens()">
+        Swap POL for Tokens
       </button>
       <p id="status"></p>
     </div>
@@ -740,31 +739,31 @@
         contract = new ethers.Contract(DTFU_CONTRACT_ADDRESS, DTFU_ABI, signer);
       }
 
-      // async function swapTokens() {
-      //   if (!window.ethereum) {
-      //     alert("MetaMask is required");
-      //     return;
-      //   }
+      async function swapTokens() {
+        if (!window.ethereum) {
+          alert("MetaMask is required");
+          return;
+        }
 
-      //   const provider = new ethers.providers.Web3Provider(window.ethereum);
-      //   const signer = provider.getSigner();
-      //   const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
-      //   const abi = DTFU_ABI; //["function swap() external payable"];
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
+        const abi = DTFU_ABI; //["function swap() external payable"];
 
-      //   const contract = new ethers.Contract(contractAddress, abi, signer);
+        const contract = new ethers.Contract(contractAddress, abi, signer);
 
-      //   const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
-      //   const amountInWei = ethers.utils.parseEther(amountInMatic);
+        const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
+        const amountInWei = ethers.utils.parseEther(amountInMatic);
 
-      //   try {
-      //     const tx = await contract.swap({ value: amountInWei });
-      //     console.log("Transaction sent:", tx.hash);
-      //     await tx.wait();
-      //     console.log("Swap completed!");
-      //   } catch (error) {
-      //     console.error("Swap failed:", error);
-      //   }
-      // }
+        try {
+          const tx = await contract.swap({ value: amountInWei });
+          console.log("Transaction sent:", tx.hash);
+          await tx.wait();
+          console.log("Swap completed!");
+        } catch (error) {
+          console.error("Swap failed:", error);
+        }
+      }
 
       swapButton.addEventListener("click", async () => {
         if (!window.ethereum) {
