@@ -73,6 +73,7 @@
     <script>
       console.log("Script is running!");
       const swapButton = document.getElementById("swapButton");
+      const statusElement = document.getElementById("status");
       // Check if ethers.js is loaded
       if (typeof ethers !== "undefined") {
         console.log("Ethers.js loaded successfully!");
@@ -738,30 +739,19 @@
       }
 
       async function swapTokens() {
+        const statusElement = document.getElementById("status");
+        const swapButton = document.getElementById("swapButton");
+
         if (!window.ethereum) {
-          alert("MetaMask is required");
+          statusElement.textContent = "MetaMask is required.";
           return;
         }
 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
-        const abi = DTFU_ABI; //["function swap() external payable"];
-
+        const abi = DTFU_ABI;
         const contract = new ethers.Contract(contractAddress, abi, signer);
-
-        //   const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
-        //   const amountInWei = ethers.utils.parseEther(amountInMatic);
-
-        //   try {
-        //     const tx = await contract.swap({ value: amountInWei });
-        //     console.log("Transaction sent:", tx.hash);
-        //     await tx.wait();
-        //     console.log("Swap completed!");
-        //   } catch (error) {
-        //     console.error("Swap failed:", error);
-        //   }
-        // }
 
         const amountInMatic = document.getElementById("amount").value; // Get user input
         if (!amountInMatic || isNaN(amountInMatic) || amountInMatic <= 0) {
@@ -772,7 +762,20 @@
         const amountInWei = ethers.utils.parseEther(amountInMatic);
 
         try {
-          swapButton.disabled = true; // Disable button while processing
+          swapButton.disabled = true;
+          statusElement.textContent = "Checking balance...";
+
+          // Check user balance before proceeding
+          const userAddress = await signer.getAddress();
+          const balance = await provider.getBalance(userAddress);
+
+          if (balance.lt(amountInWei)) {
+            statusElement.textContent =
+              "Error: Insufficient funds. You need more MATIC to complete this swap.";
+            swapButton.disabled = false;
+            return;
+          }
+
           statusElement.textContent = "Processing transaction...";
 
           const tx = await contract.swap({ value: amountInWei });
@@ -785,21 +788,24 @@
         } catch (error) {
           console.error("Swap failed:", error);
 
-          // Extract relevant error message
           let errorMessage = "Transaction failed. Please try again.";
-          if (error.data?.message) {
+
+          if (error.message.includes("insufficient funds")) {
+            errorMessage =
+              "Error: Insufficient funds for gas and swap. Please add more MATIC.";
+          } else if (error.data?.message) {
             errorMessage = error.data.message;
           } else if (error.message) {
             errorMessage = error.message;
           }
 
-          statusElement.textContent = `Error: ${errorMessage}`;
+          statusElement.textContent = errorMessage;
         } finally {
-          swapButton.disabled = false; // Re-enable button
+          swapButton.disabled = false;
         }
       }
 
-      // swapButton.addEventListener("click", async () => {
+      // async function swapTokens() {
       //   if (!window.ethereum) {
       //     alert("MetaMask is required");
       //     return;
@@ -812,18 +818,54 @@
 
       //   const contract = new ethers.Contract(contractAddress, abi, signer);
 
-      //   const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
+      //   //   const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
+      //   //   const amountInWei = ethers.utils.parseEther(amountInMatic);
+
+      //   //   try {
+      //   //     const tx = await contract.swap({ value: amountInWei });
+      //   //     console.log("Transaction sent:", tx.hash);
+      //   //     await tx.wait();
+      //   //     console.log("Swap completed!");
+      //   //   } catch (error) {
+      //   //     console.error("Swap failed:", error);
+      //   //   }
+      //   // }
+
+      //   const amountInMatic = document.getElementById("amount").value; // Get user input
+      //   if (!amountInMatic || isNaN(amountInMatic) || amountInMatic <= 0) {
+      //     statusElement.textContent = "Please enter a valid amount.";
+      //     return;
+      //   }
+
       //   const amountInWei = ethers.utils.parseEther(amountInMatic);
 
       //   try {
+      //     swapButton.disabled = true; // Disable button while processing
+      //     statusElement.textContent = "Processing transaction...";
+
       //     const tx = await contract.swap({ value: amountInWei });
       //     console.log("Transaction sent:", tx.hash);
+      //     statusElement.textContent = `Transaction sent: ${tx.hash}`;
+
       //     await tx.wait();
       //     console.log("Swap completed!");
+      //     statusElement.textContent = "Swap completed successfully!";
       //   } catch (error) {
       //     console.error("Swap failed:", error);
+
+      //     // Extract relevant error message
+      //     let errorMessage = "Transaction failed. Please try again.";
+      //     if (error.data?.message) {
+      //       errorMessage = error.data.message;
+      //     } else if (error.message) {
+      //       errorMessage = error.message;
+      //     }
+
+      //     statusElement.textContent = `Error: ${errorMessage}`;
+      //   } finally {
+      //     swapButton.disabled = false; // Re-enable button
       //   }
-      // });
+      // }
 
       document.addEventListener("DOMContentLoaded", async () => {
         await initializeContract();
