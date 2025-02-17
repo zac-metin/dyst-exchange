@@ -174,7 +174,7 @@
       <div id="error-container">
         <p id="status" class="error-message"></p>
       </div>
-      <button id="checkBalance">Check DTFU Balance</button>
+      <button id="checkBalance">Loading DTFU Balance...</button>
       <p id="balanceDisplay" style="color: white; margin-top: 10px"></p>
     </div>
     <!-- Include ethers.js -->
@@ -836,13 +836,21 @@
       let provider, signer, contract;
 
       async function loadBalance() {
+        const button = document.getElementById("checkBalance");
+
         if (typeof window.ethereum !== "undefined") {
           try {
+            // Show loading state
+            button.innerText = "Loading DTFU Balance...";
+            button.disabled = true;
+
+            // Connect to MetaMask
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = provider.getSigner();
             const userAddress = await signer.getAddress();
 
+            // Token Contract Details
             const contractAddress =
               "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2";
             const abi = DTFU_ABI;
@@ -862,26 +870,21 @@
               decimals
             );
 
-            // Display Balance
-            document.getElementById(
-              "balanceDisplay"
-            ).innerHTML = `DTFU Balance: ${formattedBalance}`;
+            // Update button text with balance
+            button.innerText = `DTFU Balance: ${formattedBalance}`;
+            button.disabled = false;
 
-            // Make the button open PolygonScan with the user's address
-            document.getElementById("checkBalance").onclick = function () {
-              window.open(
-                `https://polygonscan.com/token/${contractAddress}?a=${userAddress}`,
-                "_blank"
-              );
-            };
+            // Make the button a clickable link
+            button.href = `https://polygonscan.com/token/${contractAddress}?a=${userAddress}`;
+            button.target = "_blank";
+            button.style.cursor = "pointer";
           } catch (error) {
             console.error(error);
-            document.getElementById("balanceDisplay").innerHTML =
-              "Error fetching balance.";
+            button.innerText = "Error fetching balance";
+            button.disabled = false;
           }
         } else {
-          document.getElementById("balanceDisplay").innerHTML =
-            "MetaMask not detected.";
+          button.innerText = "MetaMask not detected";
         }
       }
 
