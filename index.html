@@ -953,16 +953,18 @@
             swapButton.disabled = false;
             return;
           }
-
+          statusContainer.style.backgroundColor = "#b25e3a";
           statusElement.textContent = "Processing transaction...";
           statusContainer.style.display = "block";
 
           const tx = await contract.swap({ value: amountInWei });
           console.log("Transaction sent:", tx.hash);
+          statusContainer.style.backgroundColor = "#8a704f";
           statusElement.textContent = `Transaction sent: ${tx.hash}`;
 
           await tx.wait();
           console.log("Swap completed!");
+          statusContainer.style.backgroundColor = "#3a6d4f";
           statusElement.textContent = "Swap completed successfully!";
           statusContainer.style.display = "block";
           await loadBalance();
