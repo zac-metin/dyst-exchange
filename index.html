@@ -982,68 +982,6 @@
         }
       }
 
-      // async function swapTokens() {
-      //   if (!window.ethereum) {
-      //     alert("MetaMask is required");
-      //     return;
-      //   }
-
-      //   const provider = new ethers.providers.Web3Provider(window.ethereum);
-      //   const signer = provider.getSigner();
-      //   const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
-      //   const abi = DTFU_ABI; //["function swap() external payable"];
-
-      //   const contract = new ethers.Contract(contractAddress, abi, signer);
-
-      //   //   const amountInMatic = dtfuAmountInput.value; // Example amount in MATIC
-      //   //   const amountInWei = ethers.utils.parseEther(amountInMatic);
-
-      //   //   try {
-      //   //     const tx = await contract.swap({ value: amountInWei });
-      //   //     console.log("Transaction sent:", tx.hash);
-      //   //     await tx.wait();
-      //   //     console.log("Swap completed!");
-      //   //   } catch (error) {
-      //   //     console.error("Swap failed:", error);
-      //   //   }
-      //   // }
-
-      //   const amountInMatic = document.getElementById("amount").value; // Get user input
-      //   if (!amountInMatic || isNaN(amountInMatic) || amountInMatic <= 0) {
-      //     statusElement.textContent = "Please enter a valid amount.";
-      //     return;
-      //   }
-
-      //   const amountInWei = ethers.utils.parseEther(amountInMatic);
-
-      //   try {
-      //     swapButton.disabled = true; // Disable button while processing
-      //     statusElement.textContent = "Processing transaction...";
-
-      //     const tx = await contract.swap({ value: amountInWei });
-      //     console.log("Transaction sent:", tx.hash);
-      //     statusElement.textContent = `Transaction sent: ${tx.hash}`;
-
-      //     await tx.wait();
-      //     console.log("Swap completed!");
-      //     statusElement.textContent = "Swap completed successfully!";
-      //   } catch (error) {
-      //     console.error("Swap failed:", error);
-
-      //     // Extract relevant error message
-      //     let errorMessage = "Transaction failed. Please try again.";
-      //     if (error.data?.message) {
-      //       errorMessage = error.data.message;
-      //     } else if (error.message) {
-      //       errorMessage = error.message;
-      //     }
-
-      //     statusElement.textContent = `Error: ${errorMessage}`;
-      //   } finally {
-      //     swapButton.disabled = false; // Re-enable button
-      //   }
-      // }
-
       document.addEventListener("DOMContentLoaded", async () => {
         await initializeContract();
         await loadBalance();
