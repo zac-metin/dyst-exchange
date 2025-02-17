@@ -838,19 +838,14 @@
       async function loadBalance() {
         if (typeof window.ethereum !== "undefined") {
           try {
-            // Connect to MetaMask
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             await provider.send("eth_requestAccounts", []);
             const signer = provider.getSigner();
             const userAddress = await signer.getAddress();
 
-            // Token Contract Details
             const contractAddress =
               "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2";
-            const abi = [
-              "function balanceOf(address owner) view returns (uint256)",
-              "function decimals() view returns (uint8)",
-            ];
+            const abi = DTFU_ABI;
 
             // Connect to Token Contract
             const contract = new ethers.Contract(
@@ -961,6 +956,7 @@
           console.log("Swap completed!");
           statusElement.textContent = "Swap completed successfully!";
           statusContainer.style.display = "block";
+          await loadBalance();
         } catch (error) {
           console.error("Swap failed:", error);
 
