@@ -178,7 +178,9 @@
       <div id="error-container">
         <p id="status" class="error-message"></p>
       </div>
-      <button id="checkBalance">Loading DTFU Balance...</button>
+      <a href="#" id="checkBalanceUrl">
+        <button id="checkBalance">Loading DTFU Balance...</button>
+      </a>
       <p id="balanceDisplay" style="color: white; margin-top: 10px"></p>
     </div>
     <!-- Include ethers.js -->
@@ -841,6 +843,7 @@
 
       async function loadBalance() {
         const button = document.getElementById("checkBalance");
+        const buttonUrl = document.getElementById("checkBalanceUrl");
 
         if (typeof window.ethereum !== "undefined") {
           try {
@@ -874,14 +877,12 @@
               decimals
             );
 
-            // Update button text with balance
             button.innerText = `DTFU Balance: ${formattedBalance}`;
             button.disabled = false;
 
-            // Make the button a clickable link
-            button.href = `https://polygonscan.com/token/${contractAddress}?a=${userAddress}`;
-            button.target = "_blank";
-            button.style.cursor = "pointer";
+            buttonUrl.href = `https://polygonscan.com/token/${contractAddress}?a=${userAddress}`;
+            buttonUrl.target = "_blank";
+            buttonUrl.style.cursor = "pointer";
           } catch (error) {
             console.error(error);
             button.innerText = "Error fetching balance";
