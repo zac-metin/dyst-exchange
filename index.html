@@ -179,20 +179,41 @@
       <div id="error-container">
         <p id="status" class="error-message"></p>
       </div>
+      <div id="ownerUI" style="display: none">
+        <button id="withdrawButton">Withdraw POL</button>
+        <div>
+          <input
+            type="text"
+            id="dtfuAmount"
+            placeholder="Amount to transfer DTFU"
+          />
+          <button id="transferDTFUButton">Transfer DTFU to contract</button>
+        </div>
+        <div>
+          <input
+            type="text"
+            id="burnAmount"
+            placeholder="Enter amount to burn"
+          />
+          <button id="burnButton" onclick="burnTokens()">Burn Tokens</button>
+          <p id="burnStatus"></p>
+        </div>
+      </div>
       <a href="#" id="checkBalanceUrl">
         <button id="checkBalance">Loading DTFU Balance...</button>
       </a>
       <p id="balanceDisplay" style="color: white; margin-top: 10px"></p>
     </div>
-    <!-- Include ethers.js -->
+
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-    <!-- Custom script -->
     <script>
       console.log("Script is running!");
       const swapButton = document.getElementById("swapButton");
       const statusElement = document.getElementById("status");
-      // Check if ethers.js is loaded
+      const withdrawButton = document.getElementById("withdrawButton");
+      const transferDTFUButton = document.getElementById("transferDTFUButton");
+
       if (typeof ethers !== "undefined") {
         console.log("Ethers.js loaded successfully!");
       } else {
@@ -988,6 +1009,78 @@
           swapButton.disabled = false;
         }
       }
+
+      async function checkIfOwner() {
+        console.log("Calling Owner Check");
+        const account = await signer.getAddress();
+        if (account.toLowerCase() === ownerAddress.toLowerCase()) {
+          console.log("Owner account detected. Showing owner-specific UI.");
+          document.getElementById("ownerUI").style.display = "block";
+        } else {
+          console.log("Non-owner account detected. Hiding owner-specific UI.");
+          document.getElementById("ownerUI").style.display = "none";
+        }
+      }
+
+      async function withdrawPOL() {
+        try {
+          const tx = await contract.withdraw();
+          console.log("Withdrawal transaction sent:", tx);
+          await tx.wait();
+          console.log("POL withdrawn successfully!");
+          statusText.textContent = "POL withdrawn successfully!";
+        } catch (error) {
+          console.error("Error withdrawing POL:", error);
+          statusText.textContent = `Error: ${error.message}`;
+        }
+      }
+
+      async function burnTokens() {
+        console.log("hello");
+        try {
+          if (!window.ethereum) {
+            alert("MetaMask is required");
+            return;
+          }
+
+          console.log("Starting burn");
+
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          const signer = provider.getSigner();
+
+          const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Your contract
+          const abi = DTFU_ABI; // Use `burn`, not `burnFrom`
+
+          const contract = new ethers.Contract(contractAddress, abi, signer);
+
+          const burnAmount = document.getElementById("burnAmount").value;
+          if (!burnAmount || isNaN(burnAmount) || burnAmount <= 0) {
+            throw new Error("Please enter a valid amount.");
+          }
+
+          const amountToBurn = ethers.utils.parseEther(burnAmount);
+
+          console.log("Burning tokens:", burnAmount);
+
+          const tx = await contract.burn(amountToBurn);
+          console.log("Transaction sent:", tx.hash);
+
+          await tx.wait();
+          console.log("Burn successful!");
+
+          document.getElementById(
+            "burnStatus"
+          ).textContent = `Successfully burned ${burnAmount} tokens!`;
+        } catch (error) {
+          console.error("Burn failed:", error);
+          document.getElementById(
+            "burnStatus"
+          ).textContent = `Error: ${error.message}`;
+        }
+      }
+
+      withdrawButton.addEventListener("click", withdrawPOL);
 
       document.addEventListener("DOMContentLoaded", async () => {
         await initializeContract();
