@@ -94,7 +94,6 @@
       }
 
       #ownerUI {
-        display: grid;
         margin-top: 10vh;
         gap: 15px;
       }
@@ -1025,7 +1024,7 @@
         const account = await signer.getAddress();
         if (account.toLowerCase() === ownerAddress.toLowerCase()) {
           console.log("Owner account detected. Showing owner-specific UI.");
-          document.getElementById("ownerUI").style.display = "block";
+          document.getElementById("ownerUI").style.display = "grid";
         } else {
           console.log("Non-owner account detected. Hiding owner-specific UI.");
           document.getElementById("ownerUI").style.display = "none";
