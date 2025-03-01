@@ -183,10 +183,15 @@
         <div>
           <input
             type="text"
+            id="dtfuRecipient"
+            placeholder="Recipient Address"
+          />
+          <input
+            type="text"
             id="dtfuAmount"
             placeholder="Amount to transfer DTFU"
           />
-          <button id="transferDTFUButton">Transfer DTFU to contract</button>
+          <button id="transferDTFUButton">Transfer DTFU</button>
         </div>
         <div>
           <input
@@ -1086,6 +1091,66 @@
         await loadBalance();
         await checkIfOwner();
       });
+
+      document
+        .getElementById("transferDTFUButton")
+        .addEventListener("click", transferDTFU);
+
+      async function transferDTFU() {
+        const statusContainer = document.getElementById("error-container");
+        const statusElement = document.getElementById("status");
+
+        statusContainer.style.display = "none"; // Hide status initially
+        statusElement.textContent = ""; // Clear previous messages
+
+        if (!window.ethereum) {
+          statusElement.textContent = "MetaMask is required.";
+          statusContainer.style.display = "block";
+          return;
+        }
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contractAddress = "0xa7f2b206E8618D5016FFC78c9c1C6D86f6505cB2"; // Replace with your contract address
+        const abi = DTFU_ABI;
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+
+        const recipient = document.getElementById("dtfuRecipient").value.trim();
+        const amount = document.getElementById("dtfuAmount").value.trim();
+
+        if (!ethers.utils.isAddress(recipient)) {
+          statusElement.textContent = "Invalid recipient address.";
+          statusContainer.style.display = "block";
+          return;
+        }
+
+        if (!amount || isNaN(amount) || amount <= 0) {
+          statusElement.textContent = "Please enter a valid amount.";
+          statusContainer.style.display = "block";
+          return;
+        }
+
+        const amountInWei = ethers.utils.parseUnits(amount, 18); // Adjust decimal places as per your token
+
+        try {
+          statusElement.textContent = "Processing transfer...";
+          statusContainer.style.display = "block";
+
+          const tx = await contract.transfer(recipient, amountInWei);
+          console.log("Transaction sent:", tx.hash);
+          statusElement.textContent = `Transaction sent: ${tx.hash}`;
+
+          await tx.wait();
+          console.log("Transfer completed!");
+          statusElement.textContent = "Transfer completed successfully!";
+          statusContainer.style.display = "block";
+        } catch (error) {
+          console.error("Transfer failed:", error);
+          statusElement.textContent =
+            error.message || "Transfer failed. Please try again.";
+          statusContainer.style.display = "block";
+        }
+      }
     </script>
   </body>
 </html>
